@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "build": "tsc",
-  "start": "node dist/server.js",
+  "build": "tsc -p backend/tsconfig.json",
+  "start": "node backend/dist/server.js",
   "test": "npm run build && npm run start"
-},
+}
+
 
   "keywords": [],
   "author": "",
