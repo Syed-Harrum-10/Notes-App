@@ -8,11 +8,12 @@ interface PayloadType {
     id: string,
     name: string,
     email: string,
+    role: string
 }
 
 const Register = async (req: Request, res: Response) => {
     try {
-        const {name, email, password} = req.body;
+        const {name, email, password, role} = req.body;
         
         const isExists = await Pool.query(`SELECT * FROM auth WHERE email = $1`, [email])
         
@@ -24,7 +25,7 @@ const Register = async (req: Request, res: Response) => {
         }
         
         const hashedPassword = await bcrypt.hash(password, 10)
-        const createUser = await Pool.query(`INSERT INTO auth (name, email, password) VALUES ($1, $2, $3) RETURNING *`, [name, email, hashedPassword])
+        const createUser = await Pool.query(`INSERT INTO auth (name, email, password, role) VALUES ($1, $2, $3) RETURNING *`, [name, email, hashedPassword, role])
         
         const user = createUser.rows[0];
         
@@ -32,6 +33,7 @@ const Register = async (req: Request, res: Response) => {
             id: user.id,  
             name: user.name,
             email: user.email,
+            role: user.role
         }
         
         const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
@@ -50,7 +52,8 @@ const Register = async (req: Request, res: Response) => {
             user: {
                 id: user.id,
                 name: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         })
         
@@ -65,7 +68,7 @@ const Register = async (req: Request, res: Response) => {
 
 const login = async (req: Request, res: Response) => {
     try {
-        const {email, password} = req.body;
+        const {email, password, role} = req.body;
         const isExists = await Pool.query(`SELECT * FROM auth WHERE email = $1`, [email])
         
 
@@ -76,6 +79,11 @@ const login = async (req: Request, res: Response) => {
             })
         }
         
+        if(role != isExists.role){
+            res.status(401).json({
+                message: "Unauthorized access"
+            })
+        }
 
         const user = isExists.rows[0]
         const comparePassword = await bcrypt.compare(password, user.password)
@@ -89,9 +97,10 @@ const login = async (req: Request, res: Response) => {
         
 
         const payload: PayloadType = {
-            id: user.id,  
-            name: user.name,
-            email: user.email,
+            id: isExists.id,  
+            name: isExists.name,
+            email: isExists.email,
+            role: isExists.role
         }
         
         const token = jwt.sign(payload, process.env.JWT_SECRET as string, {

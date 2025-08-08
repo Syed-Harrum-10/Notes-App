@@ -1,6 +1,8 @@
-create table auth(
-    id serial primary key,
-    name varchar(100) not null,
-    email varchar(100) not null,
-    password varchar(100) not null
-)
+CREATE TABLE auth (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    role VARCHAR(50) DEFAULT 'customer', 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
