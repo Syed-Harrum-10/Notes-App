@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "node backend/server.ts && exit 0"
+  "build": "tsc",
+  "start": "node dist/server.js",
+  "test": "npm run build && npm run start"
 },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
